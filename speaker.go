@@ -58,7 +58,7 @@ func main() {
 	http.HandleFunc("/main", controller)
 	http.HandleFunc("/all", allstuff)
 	http.HandleFunc("/del", deleterfu)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":3000", nil)
 
 }
 
@@ -67,7 +67,10 @@ func controller(rw http.ResponseWriter, req *http.Request) {
 	(rw).Header().Set("Access-Control-Allow-Origin", "*")
 	(rw).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 	(rw).Header().Set("Access-Control-Allow-Headers", "*")
-
+	if req.Method == "OPTIONS" {
+		//fmt.Println("mach nix")
+		return
+	}
 	fmt.Println("main func")
 
 	b, err := ioutil.ReadAll(req.Body)
@@ -228,6 +231,10 @@ func allstuff(rw http.ResponseWriter, req *http.Request) {
 	(rw).Header().Set("Access-Control-Allow-Origin", "*")
 	(rw).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 	(rw).Header().Set("Access-Control-Allow-Headers", "*")
+	if req.Method == "OPTIONS" {
+		//fmt.Println("mach nix")
+		return
+	}
 
 	fmt.Println("all func")
 
@@ -254,6 +261,10 @@ func deleterfu(rw2 http.ResponseWriter, req2 *http.Request) {
 	(rw2).Header().Set("Access-Control-Allow-Origin", "*")
 	(rw2).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 	(rw2).Header().Set("Access-Control-Allow-Headers", "*")
+	if req2.Method == "OPTIONS" {
+		//fmt.Println("mach nix")
+		return
+	}
 
 	b, err := ioutil.ReadAll(req2.Body)
 	if err != nil {
@@ -261,6 +272,9 @@ func deleterfu(rw2 http.ResponseWriter, req2 *http.Request) {
 	}
 	p := Delete{}
 	json.Unmarshal(b, &p)
+
+	speakerfunction("ich entferne " + temptermine[p.Idd].name)
+	temptermine = append(temptermine[:p.Idd], temptermine[p.Idd+1:]...)
 
 	end, err := json.Marshal(p)
 	if err != nil {
