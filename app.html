@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Kilian</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    .in{
+        width: 100%;
+        border: 2px solid black;
+        border-radius: 3px;
+        height: 40px;
+        font-size: 3vmin;
+    }
+    .in2{
+        margin-top: 5%;
+        width: 45%;
+        border: 2px solid black;
+        border-radius: 3px;
+        height: 40px;
+        font-size: 3vmin;
+    }
+    .but{
+        margin-top: 5%;
+        width: 100%;
+        border: 2px solid black;
+        border-radius: 3px;
+        height: 40px;
+        font-size: 3vmin;
+
+    }
+    .tli{
+        font-size: 4vmin;
+        padding: 2% 0;
+        background-color: aquamarine;
+        text-align: center;
+        margin-bottom: 1%;
+    }
+
+    .uli{
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .btwo{
+        margin-left: 3%;
+        width: 4%;
+        font-size: 4vmin;
+        border: 2px solid black;
+        
+    }
+</style>
+</head>
+<body>
+    <input class="in" type="text" placeholder="was soll ich sagen?" id="text">
+    <input class="in2" type="datetime-local" id="termin">
+    <input class="in2" type="text" placeholder="name vom Termin" id="terminname">
+    <input class="in2" type="number" placeholder="anzahl zb. 15 min" id="intervalvalue">
+    <select id="interval" class="in2">
+        <option selected=true value="none">Wiederholen?</option>
+        <option>min</option>
+        <option>std</option>
+        <option>tag</option>
+        <option>woche</option>
+        <option>monat</option>
+        <option>jahr</option>
+    </select>
+    <button class="but" onclick="go('')">los gehts !</button>
+    <button class="but" onclick="go('true')">Alle Termine vorlesen</button>
+    <button class="but" onclick="go('done')">Alle vergangenen Termine vorlesen</button>
+    <button class="but" onclick="showall()">alle Termine zeigen</button>
+    <ul class="uli" id="alletermine">
+
+    </ul>
+</body>
+</html>
+
+<script>
+
+    const ipadress = 'http://localhost:8081'
+
+    window.addEventListener('load', (event) => {
+        showall();
+    });
+    const go = async (readall1) =>{
+        console.log( document.getElementById("interval").value);
+        const rawResponse0 = await fetch(ipadress+'/main', {
+            method: 'POST',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({text: document.getElementById("text").value, termin: document.getElementById("termin").value,terminname: document.getElementById("terminname").value,readall: readall1, interval:document.getElementById("interval").value,intervalvalue:document.getElementById("intervalvalue").value})
+        });
+        const content = await rawResponse0.json();
+        console.log(content);
+        if(readall1 ==''){
+            document.getElementById("text").value = '';
+            document.getElementById("termin").value = '';
+            document.getElementById("terminname").value = '';
+            document.getElementById("interval").value = 'none';
+            document.getElementById("intervalvalue").value = '';
+            showall();
+        }   
+    }
+
+    let showall = async () =>{
+        const rawResponse = await fetch(ipadress+'/all', {
+            method: 'GET',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            }
+        });
+        const contents = await rawResponse.json();
+        var ul = document.getElementById("alletermine");
+        ul.innerHTML = "";
+        if(contents !== null){
+            for (let i = 0; i < contents.length; i++) {
+                ul.innerHTML +="<li class='tli'><b>"+contents[i][1]+"</b> "+contents[i][2]+"<button onclick='deleten("+contents[i][0]+");' class='btwo'>l</button></li>"
+            }
+        }
+    }
+
+    let deleten = (id) =>{
+        console.log(id)
+        //var r = confirm("Bisch dir sichher das du des löschen willst ?");
+        //if (r == true) {
+            const rawResponse2 =  fetch(ipadress+'/del', {
+            method: 'POST',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({did: id})
+        });
+        const content =  rawResponse2.json();
+        console.log(content);
+        //}
+        
+    }
+</script>
